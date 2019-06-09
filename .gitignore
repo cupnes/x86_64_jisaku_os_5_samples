@@ -1,6 +1,7 @@
 *~
 *.o
 *.map
+*.efi
 kernel.bin
 test
 fs
