@@ -11,7 +11,7 @@
 
 #define MB		1048576	/* 1024 * 1024 */
 
-struct platform_info {
+struct __attribute__((packed)) platform_info {
 	struct fb fb;
 	void *rsdp;
 } pi;
