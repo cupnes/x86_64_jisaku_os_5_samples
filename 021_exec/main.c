@@ -23,25 +23,27 @@ struct __attribute__((packed)) platform_info {
 
 #define INIT_APP	"test"
 
-#define MAX_APS	3
-char *ap_task[MAX_APS] = {
-	"test1", "test2", "test3"
-};
-
-/* プロセッサ番号(pnum)順に各プロセッサが画面出力する為に使用 */
-unsigned char pnum_order = 0;
+#define NUM_AP	3
+struct file *ap_task[NUM_AP] = { NULL };
 
 void start_kernel(void *_t __attribute__((unused)), struct platform_info *pi,
 		  unsigned long long pnum)
 {
 	/* APの場合、初期化処理をスキップ */
 	if (pnum) {
-		/* 自分が話せる番を待つ */
-		while (pnum_order != pnum);
+		/* 自分用のタスクが登録されるのを待つ */
+		while (!ap_task[pnum - 1]);
 
-		/* 外部アプリを実行 */
-		exec(open(ap_task[pnum - 1]));
-		pnum_order++;
+		/* 実行 */
+		putc('B');
+		puth(pnum, 1);
+		putc(' ');
+		/* puth((unsigned long long)ap_task[pnum - 1], 16); */
+		exec(ap_task[pnum - 1]);
+		puts("\r\n");
+
+		/* NULLに戻す */
+		ap_task[pnum - 1] = NULL;
 
 		/* haltして待つ */
 		while (1)
@@ -82,11 +84,42 @@ void start_kernel(void *_t __attribute__((unused)), struct platform_info *pi,
 	/* スケジューラの開始 */
 	sched_start();
 
-	/* APの実行開始 */
-	pnum_order++;
-
 	/* initアプリ起動 */
 	exec(open(INIT_APP));
+
+	puts("\r\nBSP END\r\n");
+
+	/* 各APを順番に実行 */
+	char *task_list[] = {"test1", "test2", "test3"};
+	unsigned int i;
+	/* for (i = 0; i < NUM_AP; i++) { */
+	/* 	exec(open(task_list[i])); */
+	/* 	/\* puth((unsigned long long)open(task_list[i]), 16); *\/ */
+	/* 	puts("\r\n"); */
+	/* } */
+
+	/* /\* haltして待つ *\/ */
+	/* while (1) */
+	/* 	cpu_halt(); */
+
+	for (i = 0; i < NUM_AP; i++) {
+		/* puts("BEGIN "); */
+		/* puts(task_list[i]); */
+		/* puts("\r\n"); */
+
+		/* volatile unsigned int _wait = 70000; */
+		/* while (_wait--); */
+
+		/* タスクを登録 */
+		ap_task[i] = open(task_list[i]);
+
+		/* 実行完了を待つ */
+		while (ap_task[i]);
+
+		/* puts("END "); */
+		/* puts(task_list[i]); */
+		/* puts("\r\n"); */
+	}
 
 	/* haltして待つ */
 	while (1)
