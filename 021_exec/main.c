@@ -1,4 +1,5 @@
 #include <x86.h>
+#include <mp.h>
 #include <intr.h>
 #include <pic.h>
 #include <acpi.h>
@@ -23,7 +24,6 @@ struct __attribute__((packed)) platform_info {
 
 #define INIT_APP	"test"
 
-#define NUM_AP	3
 struct file *ap_task[NUM_AP] = { NULL };
 
 void start_kernel(void *_t __attribute__((unused)), struct platform_info *pi,
@@ -35,19 +35,19 @@ void start_kernel(void *_t __attribute__((unused)), struct platform_info *pi,
 		while (!ap_task[pnum - 1]);
 
 		/* 実行 */
-		putc('B');
-		puth(pnum, 1);
-		putc(' ');
+		/* putc('B'); */
+		/* puth(pnum, 1); */
+		/* putc(' '); */
 		/* puth((unsigned long long)ap_task[pnum - 1], 16); */
 		exec(ap_task[pnum - 1]);
-		puts("\r\n");
+		/* puts("\r\n"); */
 
 		/* NULLに戻す */
 		ap_task[pnum - 1] = NULL;
 
 		/* haltして待つ */
-		while (1)
-			cpu_halt();
+		/* while (1) */
+		/* 	cpu_halt(); */
 	}
 
 	/* フレームバッファ周りの初期化 */
@@ -87,11 +87,11 @@ void start_kernel(void *_t __attribute__((unused)), struct platform_info *pi,
 	/* initアプリ起動 */
 	exec(open(INIT_APP));
 
-	puts("\r\nBSP END\r\n");
+	/* puts("\r\nBSP END\r\n"); */
 
 	/* 各APを順番に実行 */
-	char *task_list[] = {"test1", "test2", "test3"};
-	unsigned int i;
+	/* char *task_list[] = {"test1", "test2", "test3"}; */
+	/* unsigned int i; */
 	/* for (i = 0; i < NUM_AP; i++) { */
 	/* 	exec(open(task_list[i])); */
 	/* 	/\* puth((unsigned long long)open(task_list[i]), 16); *\/ */
@@ -102,7 +102,7 @@ void start_kernel(void *_t __attribute__((unused)), struct platform_info *pi,
 	/* while (1) */
 	/* 	cpu_halt(); */
 
-	for (i = 0; i < NUM_AP; i++) {
+	/* for (i = 0; i < NUM_AP; i++) { */
 		/* puts("BEGIN "); */
 		/* puts(task_list[i]); */
 		/* puts("\r\n"); */
@@ -111,15 +111,15 @@ void start_kernel(void *_t __attribute__((unused)), struct platform_info *pi,
 		/* while (_wait--); */
 
 		/* タスクを登録 */
-		ap_task[i] = open(task_list[i]);
+		/* ap_task[i] = open(task_list[i]); */
 
 		/* 実行完了を待つ */
-		while (ap_task[i]);
+		/* while (ap_task[i]); */
 
 		/* puts("END "); */
 		/* puts(task_list[i]); */
 		/* puts("\r\n"); */
-	}
+	/* } */
 
 	/* haltして待つ */
 	while (1)
