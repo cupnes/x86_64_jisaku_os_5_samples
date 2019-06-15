@@ -70,7 +70,7 @@ void exec(struct file *file)
 
 void exec_ap(struct file *file, unsigned char pnum)
 {
-	syscall(SYSCALL_EXEC, (unsigned long long)file, pnum, 0);
+	syscall(SYSCALL_EXEC_AP, (unsigned long long)file, pnum, 0);
 }
 
 void enq_task(struct file *file)

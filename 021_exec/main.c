@@ -34,20 +34,34 @@ void start_kernel(void *_t __attribute__((unused)), struct platform_info *pi,
 		/* 自分用のタスクが登録されるのを待つ */
 		while (!ap_task[pnum - 1]);
 
+		/* CPU周りの初期化 */
+		gdt_init();
+		intr_init();
+
+		/* システムコールの初期化 */
+		syscall_init();
+
 		/* 実行 */
-		/* putc('B'); */
-		/* puth(pnum, 1); */
-		/* putc(' '); */
+		putc('B');
+		puth(pnum, 1);
+		puts("\r\n");
+
+		/* CPUの割り込み有効化 */
+		enable_cpu_intr();
+
 		/* puth((unsigned long long)ap_task[pnum - 1], 16); */
 		exec(ap_task[pnum - 1]);
-		/* puts("\r\n"); */
+
+		putc('E');
+		puth(pnum, 1);
+		puts("\r\n");
 
 		/* NULLに戻す */
 		ap_task[pnum - 1] = NULL;
 
 		/* haltして待つ */
-		/* while (1) */
-		/* 	cpu_halt(); */
+		while (1)
+			cpu_halt();
 	}
 
 	/* フレームバッファ周りの初期化 */
@@ -74,6 +88,17 @@ void start_kernel(void *_t __attribute__((unused)), struct platform_info *pi,
 
 	/* ファイルシステムの初期化 */
 	fs_init(pi->fs_start);
+
+	/* AP1 test */
+	struct file *f = open("test1");
+	puts("BSP BEGIN\r\n");
+	exec(f);
+	puts("BSP END\r\n");
+	ap_task[0] = f;
+
+	/* haltして待つ */
+	while (1)
+		cpu_halt();
 
 	/* スケジューラの初期化 */
 	sched_init();
