@@ -1,5 +1,4 @@
 #include <x86.h>
-#include <mp.h>
 #include <intr.h>
 #include <pic.h>
 #include <acpi.h>
@@ -23,17 +22,18 @@ struct __attribute__((packed)) platform_info {
 };
 
 #define INIT_APP	"test"
+#define NUM_AP	3
+
+/* プロセッサ番号(pnum)順に各プロセッサが画面出力する為に使用 */
+unsigned char pnum_order = 0;
 
 struct file *ap_task[NUM_AP] = { NULL };
 
 void start_kernel(void *_t __attribute__((unused)), struct platform_info *pi,
 		  unsigned long long pnum)
 {
-	/* APの場合、初期化処理をスキップ */
+	/* APの場合、割り込み設定のみを行う */
 	if (pnum) {
-		/* 自分用のタスクが登録されるのを待つ */
-		while (!ap_task[pnum - 1]);
-
 		/* CPU周りの初期化 */
 		gdt_init();
 		intr_init();
@@ -41,23 +41,12 @@ void start_kernel(void *_t __attribute__((unused)), struct platform_info *pi,
 		/* システムコールの初期化 */
 		syscall_init();
 
-		/* 実行 */
-		putc('B');
+		/* 自分用のタスクが登録されるのを待つ */
+		while (!ap_task[pnum - 1]);
+
+		/* プロセッサ番号を表示 */
 		puth(pnum, 1);
-		puts("\r\n");
-
-		/* CPUの割り込み有効化 */
-		enable_cpu_intr();
-
-		/* puth((unsigned long long)ap_task[pnum - 1], 16); */
-		exec(ap_task[pnum - 1]);
-
-		putc('E');
-		puth(pnum, 1);
-		puts("\r\n");
-
-		/* NULLに戻す */
-		ap_task[pnum - 1] = NULL;
+		pnum_order++;
 
 		/* haltして待つ */
 		while (1)
