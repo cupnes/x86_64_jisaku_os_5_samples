@@ -73,7 +73,7 @@ void efi_main(void *ImageHandle, struct EFI_SYSTEM_TABLE *SystemTable)
 		kernel_arg3 = 0;
 	put_param(L"kernel_arg3", kernel_arg3);
 
-	/* 自身のプロセッサ番号を表示 */
+	/* BSP自身のプロセッサ番号を表示 */
 	unsigned long long pnum;
 	status = MSP->WhoAmI(MSP, &pnum);
 	assert(status, L"MSP->WhoAmI");
