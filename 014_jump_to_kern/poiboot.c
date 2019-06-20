@@ -11,13 +11,12 @@
 
 #define MB		1048576	/* 1024 * 1024 */
 
-/* AP側のUEFI処理完了までの待ち時間(単位: マイクロ秒) */
+/* AP側のUEFI処理完了までのBSPの待ち時間(単位: マイクロ秒) */
 #define WAIT_FOR_AP_USECS	100000 /* 100ms */
 
 struct __attribute__((packed)) platform_info {
 	struct fb fb;
 	void *rsdp;
-	void *fs_start;
 	unsigned int nproc;
 } pi;
 
@@ -70,20 +69,17 @@ void efi_main(void *ImageHandle, struct EFI_SYSTEM_TABLE *SystemTable)
 	pi.fb.hr = fb.hr;
 	pi.fb.vr = fb.vr;
 	pi.rsdp = find_efi_acpi_table();
-	if (has_fs == TRUE)
-		pi.fs_start = (void *)fs_start;
-	else
-		pi.fs_start = NULL;
 	unsigned long long nproc, nproc_en;
 	status = MSP->GetNumberOfProcessors(MSP, &nproc, &nproc_en);
 	assert(status, L"MSP->GetNumberOfProcessors");
 	pi.nproc = nproc_en;
 	unsigned long long kernel_arg2 = (unsigned long long)&pi;
 	put_param(L"kernel_arg2", kernel_arg2);
-	unsigned long long pnum;
-	status = MSP->WhoAmI(MSP, &pnum);
-	assert(status, L"MSP->WhoAmI");
-	unsigned long long kernel_arg3 = pnum;
+	unsigned long long kernel_arg3;
+	if (has_fs == TRUE)
+		kernel_arg3 = fs_start;
+	else
+		kernel_arg3 = 0;
 	put_param(L"kernel_arg3", kernel_arg3);
 
 	/* 全てのAPをスタートする */
@@ -240,10 +236,9 @@ void ap_main(void *_ai)
 	assert(status, L"MSP->WhoAmI");
 
 	unsigned long long stack_base = ai->stack_space_start + (pnum * MB);
-
-	unsigned long long kernel_arg1 = (unsigned long long)ST;
+	unsigned long long kernel_arg1 = 0;
 	unsigned long long kernel_arg2 = 0;
-	unsigned long long kernel_arg3 = pnum;
+	unsigned long long kernel_arg3 = 0;
 
 	/* カーネルへ渡す引数設定(引数に使うレジスタへセットする) */
 	unsigned long long _sb = stack_base, _ks = ai->kernel_start;
