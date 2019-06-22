@@ -89,7 +89,7 @@ Continue:
 
 # ref:
 # 8.10.6.1 Use the PAUSE Instruction in Spin-Wait Loops
-# - Intel® 64 and IA-32 Architectures Software Developer's Manual
+# - Intel(R) 64 and IA-32 Architectures Software Developer's Manual
 #   Volume 3 System Programming Guide
 */
 
