@@ -17,7 +17,6 @@
 struct __attribute__((packed)) platform_info {
 	struct framebuffer fb;
 	void *rsdp;
-	unsigned int nproc;
 };
 
 #define INIT_APP	"test"
