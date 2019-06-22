@@ -2,7 +2,7 @@
 
 int main(void)
 {
-	putc('0');
+	putc('A');
 
 	return 0;
 }
