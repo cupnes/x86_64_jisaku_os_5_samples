@@ -4,6 +4,8 @@
 #include <fbcon.h>
 #include <common.h>
 
+/* #define DEBUG */
+
 #define RXDESC_NUM	80
 #define TXDESC_NUM	8
 #define ALIGN_MARGIN	16
@@ -119,20 +121,25 @@ static void get_mac_addr(void)
 	unsigned char eeprom_accessible = get_eeprom_data(0x00) >= 0;
 
 	if (eeprom_accessible) {
+#ifdef DEBUG
 		puts("EEPROM ACCESSIBLE\r\n");
+#endif
 		get_mac_addr_eeprom();
 	} else {
+#ifdef DEBUG
 		puts("EEPROM NOT ACCESSIBLE\r\n");
+#endif
 		get_mac_addr_rar();
 	}
 
+#ifdef DEBUG
 	unsigned char i;
 	for (i = 0; i < 6; i++) {
 		puth(nic_mac_addr[i], 2);
 		putc(' ');
 	}
-
 	while (1);
+#endif
 }
 
 static void rx_init(void)
