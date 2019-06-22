@@ -98,9 +98,9 @@ unsigned char get_pnum(void)
 {
 	unsigned int pnum;
 
-	asm volatile ("movl	0xfee00020, %[pnum]\n"
-		      "shrl	$0x18, %[pnum]\n"
-		      : [pnum]"=a"(pnum));
+	asm volatile ("movl 0xfee00020, %[pnum]\n" /* Local APIC ID Register */
+		      "shrl $0x18, %[pnum]\n"
+		      : [pnum]"=r"(pnum));
 
 	return pnum;
 }

@@ -54,18 +54,19 @@ void gdt_init(void)
 	asm volatile ("lgdt gdtr");
 
 	/* DS・SSの設定 */
-	asm volatile ("movw $2*8, %ax\n"
-		      "movw %ax, %ds\n"
-		      "movw %ax, %ss\n");
+	asm volatile ("movw $2*8, %%ax\n"
+		      "movw %%ax, %%ds\n"
+		      "movw %%ax, %%ss\n"
+		      ::: "%ax");
 
 	/* CSの設定 */
 	unsigned short selector = SS_KERNEL_CODE;
 	unsigned long long dummy;
-	asm volatile ("pushq %[selector];"
-		      "leaq ret_label(%%rip), %[dummy];"
-		      "pushq %[dummy];"
-		      "lretq;"
-		      "ret_label:"
+	asm volatile ("pushq %[selector]\n"
+		      "leaq ret_label(%%rip), %[dummy]\n"
+		      "pushq %[dummy]\n"
+		      "lretq\n"
+		      "ret_label:\n"
 		      : [dummy]"=r"(dummy)
 		      : [selector]"m"(selector));
 }
