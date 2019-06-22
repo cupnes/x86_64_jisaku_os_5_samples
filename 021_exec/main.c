@@ -17,21 +17,20 @@
 struct __attribute__((packed)) platform_info {
 	struct framebuffer fb;
 	void *rsdp;
-	void *fs_start;
-	unsigned int nproc;
 };
 
 #define INIT_APP	"test"
 #define NUM_AP	3
 
-/* プロセッサ番号(pnum)順に各プロセッサが画面出力する為に使用 */
-unsigned char pnum_order = 0;
-
 struct file *ap_task[NUM_AP] = { NULL };
 
+unsigned char get_pnum(void);
+
 void start_kernel(void *_t __attribute__((unused)), struct platform_info *pi,
-		  unsigned long long pnum)
+		  void *_fs_start)
 {
+	unsigned char pnum = get_pnum();
+
 	/* APの場合、割り込み設定のみを行う */
 	if (pnum) {
 		/* CPU周りの初期化 */
@@ -44,9 +43,8 @@ void start_kernel(void *_t __attribute__((unused)), struct platform_info *pi,
 		/* 自分用のタスクが登録されるのを待つ */
 		while (!ap_task[pnum - 1]);
 
-		/* プロセッサ番号を表示 */
-		puth(pnum, 1);
-		pnum_order++;
+		/* 実行 */
+		exec(ap_task[pnum - 1]);
 
 		/* haltして待つ */
 		while (1)
@@ -76,7 +74,7 @@ void start_kernel(void *_t __attribute__((unused)), struct platform_info *pi,
 	syscall_init();
 
 	/* ファイルシステムの初期化 */
-	fs_init(pi->fs_start);
+	fs_init(_fs_start);
 
 	/* AP1 test */
 	struct file *f = open("test1");
@@ -138,4 +136,15 @@ void start_kernel(void *_t __attribute__((unused)), struct platform_info *pi,
 	/* haltして待つ */
 	while (1)
 		cpu_halt();
+}
+
+unsigned char get_pnum(void)
+{
+	unsigned int pnum;
+
+	asm volatile ("movl	0xfee00020, %[pnum]\n"
+		      "shrl	$0x18, %[pnum]\n"
+		      : [pnum]"=a"(pnum));
+
+	return pnum;
 }
