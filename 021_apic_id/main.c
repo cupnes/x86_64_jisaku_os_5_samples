@@ -1,6 +1,7 @@
 #include <x86.h>
 #include <intr.h>
 #include <pic.h>
+#include <apic.h>
 #include <acpi.h>
 #include <fb.h>
 #include <kbc.h>
@@ -23,8 +24,6 @@ struct __attribute__((packed)) platform_info {
 
 /* コンソールへアクセス可能なCPUを管理(同時アクセスを簡易的に防ぐ) */
 unsigned char con_access_perm = 0;
-
-unsigned char get_pnum(void);
 
 void start_kernel(void *_t __attribute__((unused)), struct platform_info *pi,
 		  void *_fs_start)
@@ -97,15 +96,4 @@ void start_kernel(void *_t __attribute__((unused)), struct platform_info *pi,
 	/* haltして待つ */
 	while (1)
 		cpu_halt();
-}
-
-unsigned char get_pnum(void)
-{
-	unsigned int pnum;
-
-	asm volatile ("movl 0xfee00020, %[pnum]\n" /* Local APIC ID Register */
-		      "shrl $0x18, %[pnum]\n"
-		      : [pnum]"=r"(pnum));
-
-	return pnum;
 }
