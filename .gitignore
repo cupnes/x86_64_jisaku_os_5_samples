@@ -5,6 +5,7 @@
 *.efi
 kernel.bin
 test
+puta
 fs
 fs.img
 GPATH
