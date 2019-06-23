@@ -14,6 +14,7 @@
 struct __attribute__((packed)) platform_info {
 	struct fb fb;
 	void *rsdp;
+	unsigned int nproc;
 } pi;
 
 void load_config(
@@ -59,6 +60,10 @@ void efi_main(void *ImageHandle, struct EFI_SYSTEM_TABLE *SystemTable)
 	pi.fb.hr = fb.hr;
 	pi.fb.vr = fb.vr;
 	pi.rsdp = find_efi_acpi_table();
+	unsigned long long nproc, nproc_en;
+	status = MSP->GetNumberOfProcessors(MSP, &nproc, &nproc_en);
+	assert(status, L"MSP->GetNumberOfProcessors");
+	pi.nproc = nproc_en;
 	unsigned long long kernel_arg2 = (unsigned long long)&pi;
 	put_param(L"kernel_arg2", kernel_arg2);
 	unsigned long long kernel_arg3;
