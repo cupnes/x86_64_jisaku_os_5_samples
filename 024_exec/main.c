@@ -1,6 +1,8 @@
 #include <x86.h>
+#include <ap.h>
 #include <intr.h>
 #include <pic.h>
+#include <apic.h>
 #include <acpi.h>
 #include <fb.h>
 #include <kbc.h>
@@ -21,38 +23,19 @@ struct __attribute__((packed)) platform_info {
 };
 
 #define INIT_APP	"test"
-#define MAX_APS		16
 
 /* コンソールの初期化が完了したか否か */
 unsigned char is_con_inited = 0;
-
-unsigned char get_pnum(void);
-
-struct file *ap_task[MAX_APS] = { NULL };
 
 void start_kernel(void *_t __attribute__((unused)), struct platform_info *pi,
 		  void *_fs_start)
 {
 	unsigned char pnum = get_pnum();
 
-	/* APの場合、割り込み設定のみを行う */
+	/* 専用の初期化処理を行い、実行を開始する */
 	if (pnum) {
-		/* CPU周りの初期化 */
-		gdt_init();
-		intr_init();
-
-		/* システムコールの初期化 */
-		syscall_init();
-
-		/* 自分用のタスクが登録されるのを待つ */
-		while (!ap_task[pnum - 1]);
-
-		/* 実行 */
-		exec(ap_task[pnum - 1]);
-
-		/* haltして待つ */
-		while (1)
-			cpu_halt();
+		ap_init();
+		ap_run(pnum);
 	}
 
 	/* フレームバッファ周りの初期化 */
@@ -82,7 +65,10 @@ void start_kernel(void *_t __attribute__((unused)), struct platform_info *pi,
 	fs_init(_fs_start);
 
 	/* AP1で外部アプリ実行 */
-	ap_task[0] = open("puta");
+	struct file *app = open("puta");
+	ap_enq_task(app, 1);	/* 1回目 */
+	while (ap_enq_task(app, 1) != 0) /* 2回目を試みる */
+		CPU_PAUSE();
 
 	/* haltして待つ */
 	while (1)
@@ -103,15 +89,4 @@ void start_kernel(void *_t __attribute__((unused)), struct platform_info *pi,
 	/* haltして待つ */
 	while (1)
 		cpu_halt();
-}
-
-unsigned char get_pnum(void)
-{
-	unsigned int pnum;
-
-	asm volatile ("movl 0xfee00020, %[pnum]\n" /* Local APIC ID Register */
-		      "shrl $0x18, %[pnum]\n"
-		      : [pnum]"=r"(pnum));
-
-	return pnum;
 }

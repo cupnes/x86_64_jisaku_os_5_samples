@@ -6,6 +6,8 @@
 
 #define MAX_INTR_NO	256
 
+#define CPU_PAUSE()	asm volatile ("pause")
+
 struct __attribute__((packed)) interrupt_descriptor {
 	unsigned short offset_00_15;
 	unsigned short segment_selector;
