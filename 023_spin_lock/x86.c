@@ -99,7 +99,7 @@ void spin_lock(unsigned int *lockvar)
 	unsigned char got_lock = 0;
 	do {
 		while (*lockvar)
-			asm volatile ("pause");
+			CPU_PAUSE();
 
 		unsigned int lock = 1;
 		asm volatile ("xchg %[lock], %[lockvar]"
