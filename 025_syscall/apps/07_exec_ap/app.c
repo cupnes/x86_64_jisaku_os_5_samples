@@ -10,7 +10,5 @@ int main(void)
 			i++;
 	}
 
-	while (1);
-
 	return 0;
 }
