@@ -5,6 +5,7 @@
 #define BG_R	0
 #define BG_G	0
 #define BG_B	0
+#define NUM_CPUS	4
 
 enum {
 	UP,
@@ -15,10 +16,10 @@ enum {
 };
 
 struct env_info {
+	unsigned char id;
 	int x, y;
 	int prev_x, prev_y;
 	unsigned char dir;
-	struct pixel color;
 	int neighbor_point[NUM_DIRS];
 	unsigned long long pause_counter;
 };

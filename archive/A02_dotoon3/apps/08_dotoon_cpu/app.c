@@ -7,6 +7,8 @@ void update_env_info(struct env_info *ei);
 void move_on(struct env_info *ei, unsigned char dir);
 int is_movable(int x, int y, struct pixel *fg);
 
+struct pixel cpu_color[NUM_CPUS];
+
 int main(void)
 {
 	struct env_info ei;
@@ -17,39 +19,42 @@ int main(void)
 
 void init(struct env_info *ei)
 {
+	unsigned char i;
+	for (i = 0; i < NUM_CPUS; i++) {
+		cpu_color[i].r = cpu_color[i].g = cpu_color[i].b = 0;
+		cpu_color[i].a = 255;
+	}
+	cpu_color[0].r = cpu_color[0].b = 255;
+	cpu_color[1].b = cpu_color[1].g = 255;
+	cpu_color[2].r = cpu_color[2].g = 255;
+	cpu_color[3].g = 255;
+
 	ei->prev_x = ei->prev_y = -1;
-	ei->color.a = 255;
 	ei->pause_counter = 0;
 
-	switch (get_pnum()) {
+	ei->id = get_pnum();
+	switch (ei->id) {
 	case 0:
 		ei->x = ei->y = 0;
-		ei->color.r = ei->color.b = 255;
-		ei->color.g = 0;
 		break;
 
 	case 1:
 		ei->x = SCREEN_WIDTH - 1;
 		ei->y = 0;
-		ei->color.b = ei->color.g = 255;
-		ei->color.r = 0;
 		break;
 
 	case 2:
 		ei->x = SCREEN_WIDTH - 1;
 		ei->y = SCREEN_HEIGHT - 1;
-		ei->color.r = ei->color.g = 255;
-		ei->color.b = 0;
 		break;
 
 	case 3:
 		ei->x = 0;
 		ei->y = SCREEN_HEIGHT - 1;
-		ei->color.r = ei->color.g = ei->color.b = 255;
 		break;
 	}
 
-	draw_px(ei->x, ei->y, &ei->color);
+	draw_px(ei->x, ei->y, &cpu_color[ei->id]);
 }
 
 void run(struct env_info *ei)
@@ -65,10 +70,14 @@ void run(struct env_info *ei)
 
 void update_env_info(struct env_info *ei)
 {
-	ei->neighbor_point[UP] = is_movable(ei->x, ei->y - 1, &ei->color);
-	ei->neighbor_point[RIGHT] = is_movable(ei->x + 1, ei->y, &ei->color);
-	ei->neighbor_point[DOWN] = is_movable(ei->x, ei->y + 1, &ei->color);
-	ei->neighbor_point[LEFT] = is_movable(ei->x - 1, ei->y, &ei->color);
+	ei->neighbor_point[UP] =
+		is_movable(ei->x, ei->y - 1, &cpu_color[ei->id]);
+	ei->neighbor_point[RIGHT] =
+		is_movable(ei->x + 1, ei->y, &cpu_color[ei->id]);
+	ei->neighbor_point[DOWN] =
+		is_movable(ei->x, ei->y + 1, &cpu_color[ei->id]);
+	ei->neighbor_point[LEFT] =
+		is_movable(ei->x - 1, ei->y, &cpu_color[ei->id]);
 }
 
 void move_on(struct env_info *ei, unsigned char dir)
@@ -98,7 +107,7 @@ void move_on(struct env_info *ei, unsigned char dir)
 
 	ei->dir = dir;
 
-	draw_px(ei->x, ei->y, &ei->color);
+	draw_px(ei->x, ei->y, &cpu_color[ei->id]);
 
 	volatile unsigned long long i;
 	for (i = 0; i < ei->pause_counter; i++)
