@@ -8,8 +8,8 @@
 
 void init(unsigned int *px, unsigned int *py, struct pixel *fg);
 void run(unsigned int *px, unsigned int *py, struct pixel *fg);
-int search(unsigned int *px, unsigned int *py);
-int is_movable(int x, int y);
+int search(unsigned int *px, unsigned int *py, struct pixel *fg);
+int is_movable(int x, int y, struct pixel *fg);
 
 enum {
 	UP,
@@ -65,25 +65,25 @@ void run(unsigned int *px, unsigned int *py, struct pixel *fg)
 {
 	unsigned char end = 0;
 	while (!end) {
-		if (search(px, py) < 0)
+		if (search(px, py, fg) < 0)
 			end = 1;
 		draw_px(*px, *py, fg);
 	}
 }
 
-int search(unsigned int *px, unsigned int *py)
+int search(unsigned int *px, unsigned int *py, struct pixel *fg)
 {
 	unsigned char movable_bits = 0;
 
 	int tx = *px;
 	int ty = *py;
-	if (is_movable(tx, ty - 1))
+	if (is_movable(tx, ty - 1, fg))
 		movable_bits |= 1U << UP;
-	if (is_movable(tx + 1, ty))
+	if (is_movable(tx + 1, ty, fg))
 		movable_bits |= 1U << RIGHT;
-	if (is_movable(tx, ty + 1))
+	if (is_movable(tx, ty + 1, fg))
 		movable_bits |= 1U << DOWN;
-	if (is_movable(tx - 1, ty))
+	if (is_movable(tx - 1, ty, fg))
 		movable_bits |= 1U << LEFT;
 	if (!movable_bits)
 		return -1;
@@ -110,15 +110,16 @@ int search(unsigned int *px, unsigned int *py)
 	return nd;
 }
 
-int is_movable(int x, int y)
+int is_movable(int x, int y, struct pixel *fg)
 {
 	if ((x < 0) || (x >= SCREEN_WIDTH) || (y < 0) || (y >= SCREEN_HEIGHT))
 		return 0;
 
 	struct pixel px;
 	get_px(x, y, &px);
-	if ((px.r != BG_R) || (px.g != BG_G) || (px.b != BG_B))
-		return 0;
+	if (((px.r == BG_R) && (px.g == BG_G) && (px.b == BG_B))
+	    || ((px.r == fg->r) && (px.g == fg->g) && (px.b == fg->b)))
+		return 1;
 
-	return 1;
+	return 0;
 }
