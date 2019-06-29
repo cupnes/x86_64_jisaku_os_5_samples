@@ -21,13 +21,10 @@ void init(struct env_info *ei)
 {
 	unsigned char i;
 	for (i = 0; i < NUM_CPUS; i++) {
-		cpu_color[i].r = cpu_color[i].g = cpu_color[i].b = 0;
+		cpu_color[i].r = cpu_color[i].g = cpu_color[i].b = 255;
 		cpu_color[i].a = 255;
 	}
-	cpu_color[0].r = cpu_color[0].b = 255;
-	cpu_color[1].b = cpu_color[1].g = 255;
-	cpu_color[2].r = cpu_color[2].g = 255;
-	cpu_color[3].g = 255;
+	cpu_color[0].g = cpu_color[1].r = cpu_color[2].b = 0;
 
 	ei->prev_x = ei->prev_y = -1;
 	ei->pause_counter = 0;
