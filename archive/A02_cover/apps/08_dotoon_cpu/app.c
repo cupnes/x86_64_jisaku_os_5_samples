@@ -127,5 +127,5 @@ int is_movable(int x, int y, struct pixel *fg)
 	    || ((px.r == fg->r) && (px.g == fg->g) && (px.b == fg->b)))
 		return 0;
 
-	return 100000;
+	return 1000000;
 }
