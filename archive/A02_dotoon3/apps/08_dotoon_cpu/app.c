@@ -118,6 +118,10 @@ int is_movable(int x, int y, struct pixel *fg)
 
 	struct pixel px;
 	get_px(x, y, &px);
+
+	if ((px.r == TITLE_R) && (px.g == TITLE_G) && (px.b == TITLE_B))
+		return -1;
+
 	if (((px.r == BG_R) && (px.g == BG_G) && (px.b == BG_B))
 	    || ((px.r == fg->r) && (px.g == fg->g) && (px.b == fg->b)))
 		return 0;

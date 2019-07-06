@@ -5,6 +5,9 @@
 #define BG_R	0
 #define BG_G	0
 #define BG_B	0
+#define TITLE_R	1
+#define TITLE_G	1
+#define TITLE_B	1
 #define NUM_CPUS	4
 
 enum {
