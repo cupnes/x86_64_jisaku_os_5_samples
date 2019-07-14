@@ -1,4 +1,6 @@
 #include <x86.h>
+#include <pic.h>
+#include <apic.h>
 #include <intr.h>
 #include <proc.h>
 #include <syscall.h>
@@ -17,6 +19,8 @@ void ap_init(void)
 	intr_init();
 
 	/* システムコールの初期化 */
+	pic_init();
+	apic_init();
 	syscall_init();
 }
 
@@ -35,11 +39,6 @@ void ap_run(unsigned char pnum)
 	}
 }
 
-void ap_wakeup(unsigned char pnum)
-{
-
-}
-
 int ap_enq_task(struct file *f, unsigned char pnum)
 {
 	int result = -1;
@@ -55,7 +54,7 @@ int ap_enq_task(struct file *f, unsigned char pnum)
 	spin_unlock(&ap_task_lock[pnum - 1]);
 
 	/* タスクを登録したAPを起こす */
-	ap_wakeup(pnum);
+	send_ipi(pnum);
 
 	return result;
 }

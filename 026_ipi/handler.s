@@ -59,3 +59,7 @@ syscall_handler:
 	pop	%rcx  /* RAXは戻り値の受け渡しに使うため退避したものは捨てる */
 	pop	%rcx
 	iretq
+
+	.global ipi_handler
+ipi_handler:
+	iretq
