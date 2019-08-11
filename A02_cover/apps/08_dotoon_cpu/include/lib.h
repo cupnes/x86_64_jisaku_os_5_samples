@@ -1,5 +1,7 @@
 #pragma once
 
+#define CPU_PAUSE()	asm volatile ("pause")
+
 #define FILE_NAME_LEN	28
 struct __attribute__((packed)) file {
 	char name[FILE_NAME_LEN];

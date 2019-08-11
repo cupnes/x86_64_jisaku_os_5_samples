@@ -2,7 +2,7 @@ TARGET = dotoon_cpu
 CFLAGS = -Wall -Wextra -nostdinc -nostdlib -fno-builtin -fno-common	\
 	-Iinclude -fPIE
 LDFLAGS = -Map app.map -s -x -T ../app.ld -pie
-OBJS = app.o lib.o
+OBJS = app.o lib.o cpu_random.o
 
 $(TARGET): $(OBJS)
 	ld $(LDFLAGS) -o $@ $+

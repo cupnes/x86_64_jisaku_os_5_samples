@@ -42,7 +42,6 @@ void start_kernel(void *_t __attribute__((unused)), struct platform_info *pi,
 	fb_init(&pi->fb);
 	set_fg(255, 255, 255);
 	set_bg(0, 70, 250);
-	clear_screen();
 	is_con_inited = 1;
 
 	/* ACPIの初期化 */
